@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2019 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.executor.resultset;
 
@@ -27,10 +27,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.executor.Executor;
@@ -46,6 +43,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,7 +105,7 @@ class DefaultResultSetHandlerTest {
     final RowBounds rowBounds = new RowBounds(0, 100);
 
     final DefaultResultSetHandler defaultResultSetHandler = new DefaultResultSetHandler(null/*executor*/, ms,
-            null/*parameterHandler*/, null/*resultHandler*/, null/*boundSql*/, rowBounds);
+      null/*parameterHandler*/, null/*resultHandler*/, null/*boundSql*/, rowBounds);
 
     final ResultSetWrapper rsw = mock(ResultSetWrapper.class);
     when(rsw.getResultSet()).thenReturn(mock(ResultSet.class));
@@ -121,7 +119,7 @@ class DefaultResultSetHandlerTest {
 
     try {
       defaultResultSetHandler.createParameterizedResultObject(rsw, null/*resultType*/, constructorMappings,
-              null/*constructorArgTypes*/, null/*constructorArgs*/, null/*columnPrefix*/);
+        null/*constructorArgTypes*/, null/*constructorArgs*/, null/*columnPrefix*/);
       Assertions.fail("Should have thrown ExecutorException");
     } catch (Exception e) {
       Assertions.assertTrue(e instanceof ExecutorException, "Expected ExecutorException");
@@ -132,16 +130,39 @@ class DefaultResultSetHandlerTest {
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).resultMaps(
-        new ArrayList<ResultMap>() {
+    //
+    ArrayList<ResultMap> list = new ArrayList<ResultMap>() {
+      {
+        add(new ResultMap
+          .Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
           {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
-              {
-                add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class)).build());
-              }
-            }).build());
+            add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class)).build());
           }
-        }).build();
+        })
+          .build());
+      }
+    };
+    return new MappedStatement
+      .Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT)
+      .resultMaps(list)
+      .build();
   }
 
+  @Test
+  public void testArrayList() {
+    ArrayList<Integer> list = new ArrayList<Integer>() {
+      {
+        add(1);
+        add(2);
+      }
+    };
+    Assert.assertEquals(2, list.size());
+    Map<Integer, Integer> map = new HashMap<Integer, Integer>() {
+      {
+        put(1, 1);
+        put(2, 2);
+      }
+    };
+    Assertions.assertEquals(2, map.size());
+  }
 }

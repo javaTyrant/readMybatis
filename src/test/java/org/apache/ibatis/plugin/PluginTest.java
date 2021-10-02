@@ -23,7 +23,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PluginTest {
-
+  //mybatis在启动的时候,会读取配置文件,解析出interceptor,然后注入到Configuration的InterceptorChain对象中
+  //XMLConfigBuilder
   @Test
   void mapPluginShouldInterceptGet() {
     Map map = new HashMap();
@@ -43,6 +44,7 @@ class PluginTest {
   public static class AlwaysMapPlugin implements Interceptor {
     @Override
     public Object intercept(Invocation invocation) {
+      //只是这个类没有使用invocation,
       return "Always";
     }
 

@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2018 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2018 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.reflection;
 
@@ -28,10 +28,14 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+//解析方法参数列表的工具类
 public class ParamNameResolver {
 
   private static final String GENERIC_NAME_PREFIX = "param";
 
+  //恍然大悟.
+  //记录了各个参数在参数列表中的位置以及参数名称，其中 key 是参数在参数列表中的位置索引，value 为参数的名称。
+  //我们可以通过 @Param 注解指定一个参数名称，如果没有特别指定，则默认使用参数列表中的变量名称作为其名称
   /**
    * <p>
    * The key is the index and the value is the name of the parameter.<br />
@@ -47,12 +51,17 @@ public class ParamNameResolver {
    */
   private final SortedMap<Integer, String> names;
 
+  //是否有@Param参数.
   private boolean hasParamAnnotation;
 
   public ParamNameResolver(Configuration config, Method method) {
+    //
     final Class<?>[] paramTypes = method.getParameterTypes();
+    //
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+    //
     final SortedMap<Integer, String> map = new TreeMap<>();
+    //
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
@@ -62,8 +71,10 @@ public class ParamNameResolver {
       }
       String name = null;
       for (Annotation annotation : paramAnnotations[paramIndex]) {
+        //
         if (annotation instanceof Param) {
           hasParamAnnotation = true;
+          //设置name
           name = ((Param) annotation).value();
           break;
         }
