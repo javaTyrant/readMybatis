@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2019 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.builder;
 
@@ -32,24 +32,39 @@ import org.apache.ibatis.type.JdbcType;
  * @author Clinton Begin
  */
 public class SqlSourceBuilder extends BaseBuilder {
+  /*
+    SqlSourceBuilder 的核心操作主要有两个：
+    1.解析“#{}”占位符中携带的各种属性，例如，“#{id, javaType=int, jdbcType=NUMERIC, typeHandler=MyTypeHandler}”这个占位符，
+      指定了 javaType、jdbcType、typeHandler 等配置；
+    2.将 SQL 语句中的“#{}”占位符替换成“?”占位符，替换之后的 SQL 语句就可以提交给数据库进行编译了。
+   */
 
+  //
   private static final String PARAMETER_PROPERTIES = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
 
+  //
   public SqlSourceBuilder(Configuration configuration) {
     super(configuration);
   }
 
+  //SqlSourceBuilder 的入口是 parse() 方法，这里首先会创建一个识别“#{}”占位符的 GenericTokenParser 解析器，
+  //当识别到“#{}”占位符的时候，就由 ParameterMappingTokenHandler 这个 TokenHandler 实现完成上述两个核心步骤。
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
+    //
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+    //
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
+    //
     String sql = parser.parse(originalSql);
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
   private static class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
-
+    //list
     private List<ParameterMapping> parameterMappings = new ArrayList<>();
+    //
     private Class<?> parameterType;
+    //
     private MetaObject metaParameters;
 
     public ParameterMappingTokenHandler(Configuration configuration, Class<?> parameterType, Map<String, Object> additionalParameters) {
@@ -62,12 +77,22 @@ public class SqlSourceBuilder extends BaseBuilder {
       return parameterMappings;
     }
 
+    //
     @Override
     public String handleToken(String content) {
+      // content是前面通过GenericTokenParser识别到的#{}占位符，
+      // 这里通过buildParameterMapping()方法进行解析，得到ParameterMapping对象
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }
+    
+    //SqlSourceBuilder 完成了“#{}”占位符的解析和替换之后，
+    //会将最终的 SQL 语句以及得到的 ParameterMapping 集合封装成一个 StaticSqlSource 对象并返回。
 
+
+    //在 buildParameterMapping() 方法中会通过 ParameterExpression 工具类解析“#{}”占位符，
+    //然后通过 ParameterMapping.Builder
+    //创建对应的 ParameterMapping 对象。这里得到的 ParameterMapping 就会被记录到 parameterMappings 集合中。
     private ParameterMapping buildParameterMapping(String content) {
       Map<String, String> propertiesMap = parseParameterMapping(content);
       String property = propertiesMap.get("property");
