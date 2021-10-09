@@ -163,7 +163,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   //
   // HANDLE RESULT SETS
-  //入口
+  // 入参是一个statement
   @Override
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     //
@@ -173,24 +173,27 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     final List<Object> multipleResults = new ArrayList<>();
     //
     int resultSetCount = 0;
-    //
+
+    //从Statement中获取第一个ResultSet，其中对不同的数据库有兼容处理逻辑,
     ResultSetWrapper rsw = getFirstResultSet(stmt);
-    //获取resultMap.
+    //获取ResultMap列表.
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
-    //
+    //size
     int resultMapCount = resultMaps.size();
-    //
+    //校验.
     validateResultMapsCount(rsw, resultMapCount);
-    //
+    //循环处理.
     while (rsw != null && resultMapCount > resultSetCount) {
       //获取resultMap.
       ResultMap resultMap = resultMaps.get(resultSetCount);
-      //
+      // 根据ResultMap中定义的映射规则处理ResultSet，并将映射得到的Java对象添加到
+      // multipleResults集合中保存
       handleResultSet(rsw, resultMap, multipleResults, null);
+      //
       rsw = getNextResultSet(stmt);
       //
       cleanUpAfterHandlingResultSet();
-      //累加
+      //
       resultSetCount++;
     }
     //
@@ -248,7 +251,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
       }
     }
-    //
+    //封装 ResultSet 和 configuration
     return rs != null ? new ResultSetWrapper(rs, configuration) : null;
   }
 
@@ -287,6 +290,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   private void validateResultMapsCount(ResultSetWrapper rsw, int resultMapCount) {
+    //count不能小于1.
     if (rsw != null && resultMapCount < 1) {
       throw new ExecutorException("A query was run and no Result Maps were found for the Mapped Statement '" + mappedStatement.getId()
         + "'.  It's likely that neither a Result Type nor a Result Map was specified.");
@@ -297,12 +301,14 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   //无论是处理外层映射还是嵌套映射，都会依赖 handleRowValues() 方法完成结果集的处理（通过方法名也可以看出，handleRowValues() 方法是处理多行记录的，也就是一个结果集）。
   private void handleResultSet(ResultSetWrapper rsw, ResultMap resultMap, List<Object> multipleResults, ResultMapping parentMapping) throws SQLException {
     try {
+      //如果parentMapping不为空
       if (parentMapping != null) {
         handleRowValues(rsw, resultMap, null, RowBounds.DEFAULT, parentMapping);
       } else {
         if (resultHandler == null) {
           DefaultResultHandler defaultResultHandler = new DefaultResultHandler(objectFactory);
           handleRowValues(rsw, resultMap, defaultResultHandler, rowBounds, null);
+          //添加.
           multipleResults.add(defaultResultHandler.getResultList());
         } else {
           handleRowValues(rsw, resultMap, resultHandler, rowBounds, null);
