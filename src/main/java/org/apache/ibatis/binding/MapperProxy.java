@@ -36,9 +36,11 @@ import org.apache.ibatis.session.SqlSession;
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
   private static final long serialVersionUID = -6424540398559729838L;
-  //
-  private static final int ALLOWED_MODES = MethodHandles.Lookup.PRIVATE | MethodHandles.Lookup.PROTECTED
-    | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC;
+  //允许的方法.
+  private static final int ALLOWED_MODES = MethodHandles.Lookup.PRIVATE
+    | MethodHandles.Lookup.PROTECTED
+    | MethodHandles.Lookup.PACKAGE
+    | MethodHandles.Lookup.PUBLIC;
   private static final Constructor<Lookup> lookupConstructor;
   private static final Method privateLookupInMethod;
   private final SqlSession sqlSession;
