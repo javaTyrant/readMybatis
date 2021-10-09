@@ -50,6 +50,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+class Person {
+  int get() {
+    return 1;
+  }
+}
+
 @ExtendWith(MockitoExtension.class)
 class DefaultResultSetHandlerTest {
 
@@ -64,6 +70,15 @@ class DefaultResultSetHandlerTest {
   @Mock
   private DatabaseMetaData dbmd;
 
+  @Mock
+  private Person person;
+
+  @Test
+  void testPerson() {
+    when(person.get()).thenReturn(4);
+    assertEquals(4, person.get());
+  }
+
   /**
    * Contrary to the spec, some drivers require case-sensitive column names when getting result.
    *
@@ -71,7 +86,7 @@ class DefaultResultSetHandlerTest {
    */
   @Test
   void shouldRetainColumnNameCase() throws Exception {
-
+    //如何mock的?
     final MappedStatement ms = getMappedStatement();
 
     final Executor executor = null;

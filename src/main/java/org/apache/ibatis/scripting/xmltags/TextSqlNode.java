@@ -44,7 +44,7 @@ public class TextSqlNode implements SqlNode {
   public boolean isDynamic() {
     //
     DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
-    //
+    //创建 ${} 检查
     GenericTokenParser parser = createParser(checker);
     //
     parser.parse(text);
@@ -60,6 +60,7 @@ public class TextSqlNode implements SqlNode {
   }
 
   private GenericTokenParser createParser(TokenHandler handler) {
+    //
     return new GenericTokenParser("${", "}", handler);
   }
 
