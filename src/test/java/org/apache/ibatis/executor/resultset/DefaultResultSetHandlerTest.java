@@ -1,43 +1,11 @@
-/**
- * Copyright 2009-2019 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.ibatis.executor.resultset;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.*;
 
 import org.apache.ibatis.builder.StaticSqlSource;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.mapping.*;
+import org.apache.ibatis.mytest.Person;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
@@ -49,6 +17,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.sql.*;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultResultSetHandlerTest {
@@ -63,6 +39,14 @@ class DefaultResultSetHandlerTest {
   private Connection conn;
   @Mock
   private DatabaseMetaData dbmd;
+  @Mock
+  private Person person;
+
+  @Test
+  public void testPerson() {
+    when(person.getName()).thenReturn("jack");
+    Assert.assertEquals("jack", person.getName());
+  }
 
   /**
    * Contrary to the spec, some drivers require case-sensitive column names when getting result.
@@ -71,7 +55,7 @@ class DefaultResultSetHandlerTest {
    */
   @Test
   void shouldRetainColumnNameCase() throws Exception {
-
+    //
     final MappedStatement ms = getMappedStatement();
 
     final Executor executor = null;
@@ -79,8 +63,9 @@ class DefaultResultSetHandlerTest {
     final ResultHandler resultHandler = null;
     final BoundSql boundSql = null;
     final RowBounds rowBounds = new RowBounds(0, 100);
+    //构造器传入
     final DefaultResultSetHandler fastResultSetHandler = new DefaultResultSetHandler(executor, ms, parameterHandler, resultHandler, boundSql, rowBounds);
-
+    //stmt mock对象
     when(stmt.getResultSet()).thenReturn(rs);
     when(rs.getMetaData()).thenReturn(rsmd);
     when(rs.getType()).thenReturn(ResultSet.TYPE_FORWARD_ONLY);
@@ -93,7 +78,7 @@ class DefaultResultSetHandlerTest {
     when(stmt.getConnection()).thenReturn(conn);
     when(conn.getMetaData()).thenReturn(dbmd);
     when(dbmd.supportsMultipleResultSets()).thenReturn(false); // for simplicity.
-
+    //
     final List<Object> results = fastResultSetHandler.handleResultSets(stmt);
     assertEquals(1, results.size());
     assertEquals(100, ((HashMap) results.get(0)).get("cOlUmN1"));
@@ -114,6 +99,7 @@ class DefaultResultSetHandlerTest {
     final TypeHandler typeHandler = mock(TypeHandler.class);
     when(resultMapping.getColumn()).thenReturn("column");
     when(resultMapping.getTypeHandler()).thenReturn(typeHandler);
+    //any的用法.
     when(typeHandler.getResult(any(ResultSet.class), any(String.class))).thenThrow(new SQLException("exception"));
     List<ResultMapping> constructorMappings = Collections.singletonList(resultMapping);
 
@@ -127,6 +113,7 @@ class DefaultResultSetHandlerTest {
     }
   }
 
+  //mappedStatement是如何构造的.
   MappedStatement getMappedStatement() {
     final Configuration config = new Configuration();
     final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();

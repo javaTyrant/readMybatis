@@ -35,19 +35,31 @@ import org.apache.ibatis.session.Configuration;
  * @author Clinton Begin
  */
 public class ResultMap {
+  //配置
   private Configuration configuration;
-
+  //
   private String id;
+  //
   private Class<?> type;
+  //
   private List<ResultMapping> resultMappings;
+  //
   private List<ResultMapping> idResultMappings;
+  //
   private List<ResultMapping> constructorResultMappings;
+  //
   private List<ResultMapping> propertyResultMappings;
+  //
   private Set<String> mappedColumns;
+  //
   private Set<String> mappedProperties;
+  //
   private Discriminator discriminator;
+  //
   private boolean hasNestedResultMaps;
+  //
   private boolean hasNestedQueries;
+  //
   private Boolean autoMapping;
 
   private ResultMap() {
@@ -58,6 +70,7 @@ public class ResultMap {
 
     private ResultMap resultMap = new ResultMap();
 
+    //构造
     public Builder(Configuration configuration, String id, Class<?> type, List<ResultMapping> resultMappings) {
       this(configuration, id, type, resultMappings, null);
     }
