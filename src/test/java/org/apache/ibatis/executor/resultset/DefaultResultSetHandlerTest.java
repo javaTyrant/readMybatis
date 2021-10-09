@@ -26,11 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class Person {
-  int get() {
-    return 1;
-  }
-}
 
 @ExtendWith(MockitoExtension.class)
 class DefaultResultSetHandlerTest {
@@ -52,15 +47,6 @@ class DefaultResultSetHandlerTest {
   public void testPerson() {
     when(person.getName()).thenReturn("jack");
     Assert.assertEquals("jack", person.getName());
-  }
-
-  @Mock
-  private Person person;
-
-  @Test
-  void testPerson() {
-    when(person.get()).thenReturn(4);
-    assertEquals(4, person.get());
   }
 
   /**
