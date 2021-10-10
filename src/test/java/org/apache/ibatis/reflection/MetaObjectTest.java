@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2019 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.reflection;
 
@@ -35,16 +35,11 @@ class MetaObjectTest {
   @Test
   void shouldGetAndSetField() {
     RichType rich = new RichType();
+    //forObject?其实就是new MetaObject
     MetaObject meta = SystemMetaObject.forObject(rich);
-    meta.setValue("richField", "foo");
-    assertEquals("foo", meta.getValue("richField"));
-  }
-
-  @Test
-  void shouldGetAndSetNestedField() {
-    RichType rich = new RichType();
-    MetaObject meta = SystemMetaObject.forObject(rich);
+    //set的原理是什么呢?
     meta.setValue("richType.richField", "foo");
+    //
     assertEquals("foo", meta.getValue("richType.richField"));
   }
 
@@ -231,9 +226,9 @@ class MetaObjectTest {
     assertEquals(3, metaMap.getSetterNames().length);
 
     @SuppressWarnings("unchecked")
-    Map<String,String> name = (Map<String,String>) metaMap.getValue("name");
+    Map<String, String> name = (Map<String, String>) metaMap.getValue("name");
     @SuppressWarnings("unchecked")
-    Map<String,String> address = (Map<String,String>) metaMap.getValue("address");
+    Map<String, String> address = (Map<String, String>) metaMap.getValue("address");
 
     assertEquals("Clinton", name.get("first"));
     assertEquals("1 Some Street", address.get("street"));
@@ -298,6 +293,28 @@ class MetaObjectTest {
     assertTrue(meta.hasGetter("filterParams[0]"));
     assertTrue(meta.hasGetter("filterParams[1]"));
     assertTrue(meta.hasGetter("filterParams[2]"));
+  }
+
+  @Test
+  public void testMetaObject() {
+    Person person = new Person();
+    person.getList().add("aaaa");
+    person.getList().add("bbbb");
+    person.getList().add("cccc");
+    MetaObject metaObject = SystemMetaObject.forObject(person);
+    System.out.println(metaObject.getValue("list[1]"));
+  }
+
+  class Person {
+    List<String> list = new ArrayList<>();
+
+    public List<String> getList() {
+      return list;
+    }
+
+    public void setList(List<String> list) {
+      this.list = list;
+    }
   }
 
 }

@@ -446,6 +446,7 @@ public class Reflector {
    * @return True if the object has a writable property by the name
    */
   public boolean hasSetter(String propertyName) {
+    //map.keySet()
     return setMethods.keySet().contains(propertyName);
   }
 

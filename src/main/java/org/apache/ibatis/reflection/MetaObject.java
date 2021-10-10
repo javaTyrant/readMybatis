@@ -30,7 +30,7 @@ import java.util.Map;
  * @author Clinton Begin
  */
 public class MetaObject {
-  //
+  //源对象
   private final Object originalObject;
   //
   private final ObjectWrapper objectWrapper;
@@ -113,8 +113,11 @@ public class MetaObject {
   }
 
   public Object getValue(String name) {
+    //创建属性解析
     PropertyTokenizer prop = new PropertyTokenizer(name);
+    //如果属性中包含需要解决的子属性
     if (prop.hasNext()) {
+      //再次创建 `MetaObject`
       MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
         return null;
@@ -127,7 +130,9 @@ public class MetaObject {
   }
 
   public void setValue(String name, Object value) {
+    //
     PropertyTokenizer prop = new PropertyTokenizer(name);
+    //
     if (prop.hasNext()) {
       MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
