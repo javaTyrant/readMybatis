@@ -62,14 +62,19 @@ public class Plugin implements InvocationHandler {
     return target;
   }
 
+  //在 invoke() 方法中，Plugin 会检查当前要执行的方法是否在 signatureMap 集合中，
+  //如果在其中的话，表示当前待执行的方法是我们要拦截的目标方法之一，也就会调用 intercept() 方法执行代理逻辑；
+  //如果未在其中的话，则表示当前方法不应被代理，直接执行当前的方法即可。
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
       Set<Method> methods = signatureMap.get(method.getDeclaringClass());
+      //
       if (methods != null && methods.contains(method)) {
         //最终会执行用户传入的拦截方法
         return interceptor.intercept(new Invocation(target, method, args));
       }
+      //直接调用.
       return method.invoke(target, args);
     } catch (Exception e) {
       throw ExceptionUtil.unwrapThrowable(e);
