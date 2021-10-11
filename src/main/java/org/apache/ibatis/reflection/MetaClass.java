@@ -117,6 +117,7 @@ public class MetaClass {
     return null;
   }
 
+  //
   public boolean hasSetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
