@@ -15,11 +15,6 @@
  */
 package org.apache.ibatis.executor.loader;
 
-import java.sql.SQLException;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
@@ -34,7 +29,15 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.List;
+
 /**
+ * 记录了一次延迟加载涉及的全部信息，其中包括延迟执行的 SQL 语句（boundSql 字段）、
+ * Sql 的实参（parameterObject 字段）、用于执行延迟 SQL 的线程池（executor 字段）以及延迟加载的对象类型（targetType 字段）等，
+ * 这些信息在真正执行加载操作的时候，都是必要的信息。
+ *
  * @author Clinton Begin
  */
 public class ResultLoader {
@@ -67,8 +70,11 @@ public class ResultLoader {
     this.creatorThreadId = Thread.currentThread().getId();
   }
 
+  //核心方法.
   public Object loadResult() throws SQLException {
+    //查询list
     List<Object> list = selectList();
+    //接下来通过 ResultExtractor 从这个 List 集合中提取到延迟加载的真正对象，这里就涉及了 List 集合向 targetType 转换的一些逻辑：
     resultObject = resultExtractor.extractObjectFromList(list, targetType);
     return resultObject;
   }

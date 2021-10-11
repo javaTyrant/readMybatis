@@ -650,9 +650,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
       for (ResultMapping propertyMapping : propertyMappings) {
         // issue gcode #109 && issue #149
+        //
         if (propertyMapping.getNestedQueryId() != null && propertyMapping.isLazy()) {
-          //
-          resultObject = configuration.getProxyFactory().createProxy(resultObject, lazyLoader, configuration, objectFactory, constructorArgTypes, constructorArgs);
+          //如果检测到了延迟加载的属性，则会通过前面介绍的 ProxyFactory 为结果对象创建代理对象，
+          //然后在真正使用到延迟加载属性（即调用其 getter 方法）的时候，触发代理对象完成该属性的真正加载。
+          resultObject = configuration
+            .getProxyFactory()
+            .createProxy(resultObject, lazyLoader, configuration, objectFactory, constructorArgTypes, constructorArgs);
           break;
         }
       }
@@ -816,8 +820,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         value = DEFERRED;
       } else {
         final ResultLoader resultLoader = new ResultLoader(configuration, executor, nestedQuery, nestedQueryParameterObject, targetType, key, nestedBoundSql);
+        // 根据是否延迟加载的配置决定value的值
         if (propertyMapping.isLazy()) {
+          //
           lazyLoader.addLoader(property, metaResultObject, resultLoader);
+          //并返回 DEFERED 这个公共的占位符对象
           value = DEFERRED;
         } else {
           value = resultLoader.loadResult();
@@ -827,7 +834,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     return value;
   }
 
-  private Object prepareParameterForNestedQuery(ResultSet rs, ResultMapping resultMapping, Class<?> parameterType, String columnPrefix) throws SQLException {
+  private Object prepareParameterForNestedQuery(ResultSet rs, ResultMapping resultMapping,
+                                                Class<?> parameterType, String columnPrefix) throws SQLException {
     if (resultMapping.isCompositeResult()) {
       return prepareCompositeKeyParameter(rs, resultMapping, parameterType, columnPrefix);
     } else {
@@ -835,7 +843,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  private Object prepareSimpleKeyParameter(ResultSet rs, ResultMapping resultMapping, Class<?> parameterType, String columnPrefix) throws SQLException {
+  private Object prepareSimpleKeyParameter(ResultSet rs, ResultMapping resultMapping,
+                                           Class<?> parameterType, String columnPrefix) throws SQLException {
     final TypeHandler<?> typeHandler;
     if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
       typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
@@ -845,7 +854,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     return typeHandler.getResult(rs, prependPrefix(resultMapping.getColumn(), columnPrefix));
   }
 
-  private Object prepareCompositeKeyParameter(ResultSet rs, ResultMapping resultMapping, Class<?> parameterType, String columnPrefix) throws SQLException {
+  private Object prepareCompositeKeyParameter(ResultSet rs, ResultMapping resultMapping,
+                                              Class<?> parameterType, String columnPrefix) throws SQLException {
     final Object parameterObject = instantiateParameterObject(parameterType);
     final MetaObject metaObject = configuration.newMetaObject(parameterObject);
     boolean foundValues = false;
@@ -876,7 +886,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   // DISCRIMINATOR
   //
   // 核心流程.
-  public ResultMap resolveDiscriminatedResultMap(ResultSet rs, ResultMap resultMap, String columnPrefix) throws SQLException {
+  public ResultMap resolveDiscriminatedResultMap(ResultSet rs, ResultMap resultMap, String columnPrefix)
+    throws SQLException {
     //用于维护处理过的ResultMap唯一标识
     Set<String> pastDiscriminators = new HashSet<>();
     //获取ResultMap中的Discriminator对象，这是通过<resultMap>标签中的<discriminator>标签解析得到的

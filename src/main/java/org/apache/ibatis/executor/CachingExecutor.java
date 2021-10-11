@@ -1,38 +1,37 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2019 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.executor;
-
-import java.sql.SQLException;
-import java.util.List;
 
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.TransactionalCacheManager;
 import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
+import java.sql.SQLException;
+import java.util.List;
+
 /**
+ * CachingExecutor 是我们最后一个要介绍的 Executor 接口实现类，
+ * 它是一个 Executor 装饰器实现，会在其他 Executor 的基础之上添加二级缓存的相关功能。
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -77,10 +76,15 @@ public class CachingExecutor implements Executor {
     return delegate.update(ms, parameterObject);
   }
 
+  //cacheEnabled 被设置为 true 时，才会开启二级缓存功能
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+  public <E> List<E> query(MappedStatement ms, Object parameterObject,
+                           RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+    //获取BoundSql对象
     BoundSql boundSql = ms.getBoundSql(parameterObject);
+    //创建相应的CacheKey
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
+    //调用下面的query()方法重载
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -91,22 +95,30 @@ public class CachingExecutor implements Executor {
   }
 
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
-      throws SQLException {
+  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
+                           ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
+    throws SQLException {
+    //// 获取该命名空间使用的二级缓存
     Cache cache = ms.getCache();
     if (cache != null) {
+      // 根据<select>标签配置决定是否需要清空二级缓存
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
+        //是否包含输出参数
         ensureNoOutParams(ms, boundSql);
+        //查询二级缓存
         @SuppressWarnings("unchecked")
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
+          //二级缓存未命中，通过被装饰的Executor对象查询结果对象
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+          //将查询结果放入TransactionalCache.entriesToAddOnCommit集合中暂存
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;
       }
     }
+    // 如果未开启二级缓存，直接通过被装饰的Executor对象查询结果对象
     return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 

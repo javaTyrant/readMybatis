@@ -15,12 +15,6 @@
  */
 package org.apache.ibatis.executor;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
@@ -30,6 +24,12 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Clinton Begin
@@ -53,16 +53,24 @@ public class SimpleExecutor extends BaseExecutor {
     }
   }
 
+  //doQuery() 方法的实现逻辑
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
+      //获取配置文件
       Configuration configuration = ms.getConfiguration();
+      //获取statementHandler:通过 newStatementHandler() 方法创建 StatementHandler 对象，
+      //其中会根据 MappedStatement.statementType 配置创建相应的 StatementHandler 实现对象，并添加 RoutingStatementHandler 装饰器。
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
-      //MappedStatement、这一句是关键
+      //MappedStatement、这一句是关键.通过 prepareStatement() 方法初始化 Statement 对象，
+      //其中还依赖 ParameterHandler 填充 SQL 语句中的占位符。
       stmt = prepareStatement(handler, ms.getStatementLog());
+      //通过 StatementHandler.query() 方法执行 SQL 语句，
+      //并通过DefaultResultSetHandler将ResultSet 映射成结果对象并返回。
       return handler.query(stmt, resultHandler);
     } finally {
+      //关闭statement.
       closeStatement(stmt);
     }
   }
