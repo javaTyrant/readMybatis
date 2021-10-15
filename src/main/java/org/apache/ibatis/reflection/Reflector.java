@@ -54,7 +54,7 @@ public class Reflector {
   //5.defaultConstructor（Constructor<?> 类型）：默认构造方法。
   private Constructor<?> defaultConstructor;
 
-  //6.所有属性名称的集合，记录到这个集合中的属性名称都是大写的。
+  //6.所有属性名称的集合，记录到这个集合中的属性名称都是大写的。对.应的真实的格式的属性
   private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   //在我们构造一个 Reflector 对象的时候，传入一个 Class 对象，通过解析这个 Class 对象，

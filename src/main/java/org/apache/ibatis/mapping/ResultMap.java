@@ -39,7 +39,7 @@ public class ResultMap {
   private Configuration configuration;
   //
   private String id;
-  //
+  //返回值类型.
   private Class<?> type;
   //
   private List<ResultMapping> resultMappings;

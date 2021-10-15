@@ -500,7 +500,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
         if (value != null || (configuration.isCallSettersOnNulls() && !metaObject.getSetterType(property).isPrimitive())) {
           // gcode issue #377, call setter on nulls (value is not 'found')
-          // 为属性名映射值?
+          // 为属性名映射值.
           metaObject.setValue(property, value);
         }
       }
@@ -665,13 +665,15 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     return resultObject;
   }
 
-  private Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, String columnPrefix)
+  private Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap,
+                                    List<Class<?>> constructorArgTypes, List<Object> constructorArgs,
+                                    String columnPrefix)
     throws SQLException {
-    //
+    //获取返回值类型.
     final Class<?> resultType = resultMap.getType();
-    //
+    //创建一个metaClass,new Reflector(type);
     final MetaClass metaType = MetaClass.forClass(resultType, reflectorFactory);
-    //
+    //获取构造器信息.
     final List<ResultMapping> constructorMappings = resultMap.getConstructorResultMappings();
     //
     if (hasTypeHandlerForResultObject(rsw, resultType)) {
@@ -679,6 +681,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     } else if (!constructorMappings.isEmpty()) {
       return createParameterizedResultObject(rsw, resultType, constructorMappings, constructorArgTypes, constructorArgs, columnPrefix);
     } else if (resultType.isInterface() || metaType.hasDefaultConstructor()) {
+      //
       return objectFactory.create(resultType);
     } else if (shouldApplyAutomaticMappings(resultMap, false)) {
       return createByConstructorSignature(rsw, resultType, constructorArgTypes, constructorArgs);
@@ -786,7 +789,6 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   //
   // NESTED QUERY
   //
-
   private Object getNestedQueryConstructorValue(ResultSet rs, ResultMapping constructorMapping, String columnPrefix) throws SQLException {
     final String nestedQueryId = constructorMapping.getNestedQueryId();
     final MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);

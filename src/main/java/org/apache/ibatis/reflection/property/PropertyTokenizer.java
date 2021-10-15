@@ -19,9 +19,25 @@ import java.util.Iterator;
 
 /**
  * 标准的属性名称解析器
+ *
  * @author Clinton Begin
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
+  public static void main(String[] args) {
+    PropertyTokenizer tokenizer = new PropertyTokenizer("names[0].first");
+    System.out.println(tokenizer);
+    //name = names
+    //indexedName = names[0]
+    //index = 0
+    //children = first
+    PropertyTokenizer tokenizer1 = new PropertyTokenizer("lu.feng");
+    System.out.println(tokenizer1);
+    //name = lu
+    //indexedName = lu
+    //index = null
+    //children = feng
+  }
+
   private String name;
   private final String indexedName;
   private String index;

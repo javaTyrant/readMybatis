@@ -1,45 +1,55 @@
 package org.apache.ibatis.reflection;
 
+import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
+import org.apache.ibatis.reflection.invoker.Invoker;
+import org.apache.ibatis.reflection.invoker.MethodInvoker;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
-import org.apache.ibatis.reflection.invoker.Invoker;
-import org.apache.ibatis.reflection.invoker.MethodInvoker;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
-
 /**
  * @author Clinton Begin
  */
 public class MetaClass {
-  //
+  //反射工厂
   private final ReflectorFactory reflectorFactory;
-  //
+  //反射
   private final Reflector reflector;
 
   private MetaClass(Class<?> type, ReflectorFactory reflectorFactory) {
+    //
     this.reflectorFactory = reflectorFactory;
+    //通过factory构造
     this.reflector = reflectorFactory.findForClass(type);
   }
 
   public static MetaClass forClass(Class<?> type, ReflectorFactory reflectorFactory) {
+    //创建metaClass
     return new MetaClass(type, reflectorFactory);
   }
 
+  //
   public MetaClass metaClassForProperty(String name) {
+    //获取property的get返回值类型
     Class<?> propType = reflector.getGetterType(name);
+    //创建返回值类型的metaClass
     return MetaClass.forClass(propType, reflectorFactory);
   }
 
+  //RICHfield -> richField.规范化属性名
   public String findProperty(String name) {
+    //
     StringBuilder prop = buildProperty(name, new StringBuilder());
     return prop.length() > 0 ? prop.toString() : null;
   }
 
+  //是否使用驼峰查找属性名
   public String findProperty(String name, boolean useCamelCaseMapping) {
+    //
     if (useCamelCaseMapping) {
       name = name.replace("_", "");
     }
@@ -155,6 +165,7 @@ public class MetaClass {
   }
 
   private StringBuilder buildProperty(String name, StringBuilder builder) {
+    //
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       String propertyName = reflector.findPropertyName(prop.getName());
