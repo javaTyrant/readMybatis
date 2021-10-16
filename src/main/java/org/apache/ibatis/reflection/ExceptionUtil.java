@@ -28,6 +28,7 @@ public class ExceptionUtil {
   }
 
   public static Throwable unwrapThrowable(Throwable wrapped) {
+
     Throwable unwrapped = wrapped;
     while (true) {
       if (unwrapped instanceof InvocationTargetException) {

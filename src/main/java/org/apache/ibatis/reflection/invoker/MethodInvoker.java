@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ *
  * @author Clinton Begin
  */
 public class MethodInvoker implements Invoker {
@@ -45,8 +46,11 @@ public class MethodInvoker implements Invoker {
     try {
       return method.invoke(target, args);
     } catch (IllegalAccessException e) {
+      //
       if (Reflector.canControlMemberAccessible()) {
+        //设置可访问性.
         method.setAccessible(true);
+        //再调用一次.
         return method.invoke(target, args);
       } else {
         throw e;

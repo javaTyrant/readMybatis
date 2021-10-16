@@ -42,6 +42,9 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * 在一个 ResultMap 中，我们可以配置多个延迟加载的属性，这些属性与对应的 ResultLoader
+ * 的映射关系就记录在一个 ResultLoaderMap 对象中，ResultLoaderMap 中的 loaderMap 字段（HashMap<String, LoadPair>类型）
+ * 就用来维护这一关系，LoadPair 对象就是用来维护 ResultLoader 对象以及一些配置信息的。
  * @author Clinton Begin
  * @author Franta Mejta
  */
@@ -75,6 +78,10 @@ public class ResultLoaderMap {
     return loaderMap.containsKey(property.toUpperCase(Locale.ENGLISH));
   }
 
+  //参数是触发加载的属性名称
+  //在执行这个方法的时候，会从 loaderMap 中获取（并删除）指定属性对应的 ResultLoader 对象，
+  //并调用其 load() 方法执行延迟 SQL，完成延迟加载。
+  //再cglib和javassist中调用.
   public boolean load(String property) throws SQLException {
     LoadPair pair = loaderMap.remove(property.toUpperCase(Locale.ENGLISH));
     if (pair != null) {

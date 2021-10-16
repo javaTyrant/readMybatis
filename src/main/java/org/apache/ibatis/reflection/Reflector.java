@@ -54,7 +54,7 @@ public class Reflector {
   //5.defaultConstructor（Constructor<?> 类型）：默认构造方法。
   private Constructor<?> defaultConstructor;
 
-  //6.所有属性名称的集合，记录到这个集合中的属性名称都是大写的。
+  //6.所有属性名称的集合，记录到这个集合中的属性名称都是大写的。对.应的真实的格式的属性
   private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   //在我们构造一个 Reflector 对象的时候，传入一个 Class 对象，通过解析这个 Class 对象，
@@ -103,6 +103,7 @@ public class Reflector {
 
   //解决方法签名冲突
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
+    //两两比较确定一个胜利者,然后再继续比较.
     for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
       Method winner = null;
       String propName = entry.getKey();
@@ -114,18 +115,27 @@ public class Reflector {
         }
         Class<?> winnerType = winner.getReturnType();
         Class<?> candidateType = candidate.getReturnType();
+        //返回值类型一致
         if (candidateType.equals(winnerType)) {
+          //当某字段存在多个 getter 方法，则可能是 get/is 方法并存
+          //并存时，则必需是 boolean 值（否则不符合 JavaBean 规范），
+          //如果是is开头的,那么返回值不是Boolean.
+          //see shouldTwoGettersForNonBooleanPropertyThrowException
           if (!boolean.class.equals(candidateType)) {
+            //有歧义
             isAmbiguous = true;
             break;
           } else if (candidate.getName().startsWith("is")) {
             winner = candidate;
           }
+          //candidateType是winnerType的父类.不处理
         } else if (candidateType.isAssignableFrom(winnerType)) {
           // OK getter type is descendant
+          //winner是candidate的父类,替换.
         } else if (winnerType.isAssignableFrom(candidateType)) {
           winner = candidate;
-        } else {
+        } else {//类型不一致.
+          //有歧义
           isAmbiguous = true;
           break;
         }
@@ -150,7 +160,8 @@ public class Reflector {
   private void addSetMethods(Class<?> clazz) {
     Map<String, List<Method>> conflictingSetters = new HashMap<>();
     Method[] methods = getClassMethods(clazz);
-    Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
+    Arrays.stream(methods)
+      .filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
     resolveSetterConflicts(conflictingSetters);
   }
@@ -262,6 +273,7 @@ public class Reflector {
 
   private void addSetField(Field field) {
     if (isValidPropertyName(field.getName())) {
+      //
       setMethods.put(field.getName(), new SetFieldInvoker(field));
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       setTypes.put(field.getName(), typeToClass(fieldType));
@@ -340,6 +352,7 @@ public class Reflector {
 
   /**
    * Checks whether can control member accessible.
+   * 可访问性检查
    *
    * @return If can control member accessible, it return {@literal true}
    * @since 3.5.0
@@ -378,6 +391,7 @@ public class Reflector {
   }
 
   public Invoker getSetInvoker(String propertyName) {
+    //获取方法名.
     Invoker method = setMethods.get(propertyName);
     if (method == null) {
       throw new ReflectionException("There is no setter for property named '" + propertyName + "' in '" + type + "'");
