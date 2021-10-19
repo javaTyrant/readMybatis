@@ -38,16 +38,22 @@ import java.util.*;
 /**
  * The default implementation for {@link SqlSession}.
  * Note that this class is not Thread-Safe.
+ * 不是线程安全的.
+ * 你要的增删改查都在这里.
  *
  * @author Clinton Begin
  */
 public class DefaultSqlSession implements SqlSession {
 
+  //
   private final Configuration configuration;
+  //
   private final Executor executor;
-
+  //
   private final boolean autoCommit;
+  //
   private boolean dirty;
+  //
   private List<Cursor<?>> cursorList;
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
@@ -57,6 +63,7 @@ public class DefaultSqlSession implements SqlSession {
     this.autoCommit = autoCommit;
   }
 
+  @SuppressWarnings("unused")
   public DefaultSqlSession(Configuration configuration, Executor executor) {
     this(configuration, executor, false);
   }
