@@ -89,12 +89,19 @@ public class MetaClass {
     return MetaClass.forClass(propType, reflectorFactory);
   }
 
+  //获取getterType
   private Class<?> getGetterType(PropertyTokenizer prop) {
+    //
     Class<?> type = reflector.getGetterType(prop.getName());
+    //说明是names[0].first这种格式的
     if (prop.getIndex() != null && Collection.class.isAssignableFrom(type)) {
+      //
       Type returnType = getGenericGetterType(prop.getName());
+      //
       if (returnType instanceof ParameterizedType) {
+        //
         Type[] actualTypeArguments = ((ParameterizedType) returnType).getActualTypeArguments();
+        //
         if (actualTypeArguments != null && actualTypeArguments.length == 1) {
           returnType = actualTypeArguments[0];
           if (returnType instanceof Class) {
@@ -112,9 +119,12 @@ public class MetaClass {
     try {
       Invoker invoker = reflector.getGetInvoker(propertyName);
       if (invoker instanceof MethodInvoker) {
+        //获取MethodInvoker里的method.
         Field _method = MethodInvoker.class.getDeclaredField("method");
         _method.setAccessible(true);
+        //获取method。
         Method method = (Method) _method.get(invoker);
+        //
         return TypeParameterResolver.resolveReturnType(method, reflector.getType());
       } else if (invoker instanceof GetFieldInvoker) {
         Field _field = GetFieldInvoker.class.getDeclaredField("field");

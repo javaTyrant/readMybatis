@@ -21,11 +21,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 类型处理器
+ *
  * @author Clinton Begin
  */
 public interface TypeHandler<T> {
 
-  //
+  /**
+   *
+   * @param ps 预编译的语句
+   * @param i ?
+   * @param parameter ?
+   * @param jdbcType jdbc类型
+   * @throws SQLException
+   */
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**
