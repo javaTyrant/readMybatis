@@ -1,14 +1,5 @@
 package org.apache.ibatis.binding;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.apache.ibatis.annotations.Flush;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.cursor.Cursor;
@@ -23,6 +14,15 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * 非常重要的一个类,每一行都要熟读
  * MapperMethod 实现接口方法的入口是 execute()方法，我们来看下其内部源码：
@@ -34,8 +34,7 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class MapperMethod {
   //两个重要的核心变量.
-
-  //
+  //SqlCommand
   private final SqlCommand command;
   //
   private final MethodSignature method;
@@ -230,8 +229,7 @@ public class MapperMethod {
       final Class<?> declaringClass = method.getDeclaringClass();
 
       //MappedStatement对象就是Mapper.xml配置文件中一条SQL语句解析之后得到的对象
-      MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
-        configuration);
+      MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass, configuration);
       //
       if (ms == null) {
         if (method.getAnnotation(Flush.class) != null) {
@@ -290,11 +288,17 @@ public class MapperMethod {
   public static class MethodSignature {
     //接口方法返回值的相关信息7个字段
     private final boolean returnsMany;
+    //
     private final boolean returnsMap;
+    //
     private final boolean returnsVoid;
+    //
     private final boolean returnsCursor;
+    //
     private final boolean returnsOptional;
+    //
     private final Class<?> returnType;
+    //
     private final String mapKey;
     //Mapper 接口方法的参数列表相关的三个字段。
     private final Integer resultHandlerIndex;

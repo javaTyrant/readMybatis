@@ -15,20 +15,23 @@
  */
 package org.apache.ibatis.datasource.pooled;
 
+import org.apache.ibatis.reflection.ExceptionUtil;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.ibatis.reflection.ExceptionUtil;
-
 /**
+ * 为什么是InvocationHandler?
+ *
  * @author Clinton Begin
  */
 class PooledConnection implements InvocationHandler {
-
+  //
   private static final String CLOSE = "close";
+  //
   private static final Class<?>[] IFACES = new Class<?>[]{Connection.class};
 
   private final int hashCode;
@@ -74,7 +77,9 @@ class PooledConnection implements InvocationHandler {
 
   /**
    * Method to see if the connection is usable.
-   *
+   * 1.valid 字段值为 true；
+   * 2.realConnection 字段值不为空；
+   * 3.执行 PooledDataSource.pingConnection() 方法，返回值为 true。
    * @return True if the connection is usable
    */
   public boolean isValid() {
@@ -240,6 +245,7 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
+    //如果调用close()方法，并没有直接关闭底层连接，而是将其归还给关联的连接池
     if (CLOSE.equals(methodName)) {
       dataSource.pushConnection(this);
       return null;
