@@ -21,6 +21,7 @@ import java.util.Properties;
 public class SqlCostTimeInterceptor implements Interceptor {
   public static final Logger logger = LoggerFactory.getLogger(SqlCostTimeInterceptor.class);
 
+  //Invocation是目标方法
   public Object intercept(Invocation invocation) throws Throwable {
     StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
     long start = System.currentTimeMillis();

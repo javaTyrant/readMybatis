@@ -19,7 +19,8 @@ import org.apache.ibatis.session.ResultContext;
 
 /**
  * 它的生命周期与一个 ResultSet 相同，每从 ResultSet 映射得到一个 Java 对象都会暂存到 DefaultResultContext
- * 中的 resultObject 字段，等待后续使用，同时 DefaultResultContext 还可以计算从一个 ResultSet 映射出来的对象个数（依靠 resultCount 字段统计）。
+ * 中的 resultObject 字段，等待后续使用，同时 DefaultResultContext
+ * 还可以计算从一个 ResultSet 映射出来的对象个数（依靠 resultCount 字段统计）。
  * @author Clinton Begin
  */
 public class DefaultResultContext<T> implements ResultContext<T> {

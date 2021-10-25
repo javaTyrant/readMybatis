@@ -22,15 +22,20 @@ import java.lang.annotation.Target;
 
 /**
  * 签名
+ * 通过 @Signature 注解中的这三个配置，DemoPlugin 就可以确定要拦截的目标方法的方法签名。
+ *
  * @author Clinton Begin
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({})
 public @interface Signature {
+  //
   Class<?> type();
 
+  //
   String method();
 
+  //
   Class<?>[] args();
 }

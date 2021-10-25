@@ -58,6 +58,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private final Executor executor;
   private final Configuration configuration;
+  //持有MappedStatement
   private final MappedStatement mappedStatement;
   private final RowBounds rowBounds;
   private final ParameterHandler parameterHandler;
@@ -163,7 +164,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   //
   // HANDLE RESULT SETS
-  // 入参是一个statement
+  // statement -> list<Object>
   @Override
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     //
@@ -404,6 +405,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     ((ResultHandler<Object>) resultHandler).handleResult(resultContext);
   }
 
+  //是否要继续处理更多的行数.
   private boolean shouldProcessMoreRows(ResultContext<?> context, RowBounds rowBounds) {
     return !context.isStopped() && context.getResultCount() < rowBounds.getLimit();
   }

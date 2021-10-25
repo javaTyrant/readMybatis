@@ -33,12 +33,15 @@ import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 
 /**
  * 默认的sqlSessionFactory
+ *
  * @author Clinton Begin
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
+  //持有一个配置
   private final Configuration configuration;
 
+  //构造器传入.
   public DefaultSqlSessionFactory(Configuration configuration) {
     this.configuration = configuration;
   }
@@ -88,15 +91,23 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     return configuration;
   }
 
-  private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
+  private SqlSession openSessionFromDataSource(ExecutorType execType,
+                                               TransactionIsolationLevel level,
+                                               boolean autoCommit) {
     Transaction tx = null;
     try {
+      //获取环境
       final Environment environment = configuration.getEnvironment();
+      //获取事务工厂.
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+      //新建事务
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      //新建executor,不可变对象.
       final Executor executor = configuration.newExecutor(tx, execType);
+      //返回一个默认的sqlSession.
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
+      //
       closeTransaction(tx); // may have fetched a connection so lets call close()
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
     } finally {
