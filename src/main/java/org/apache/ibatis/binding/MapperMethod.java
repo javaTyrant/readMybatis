@@ -36,7 +36,7 @@ public class MapperMethod {
   //两个重要的核心变量.
   //SqlCommand
   private final SqlCommand command;
-  //
+  //方法签名
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
@@ -44,7 +44,7 @@ public class MapperMethod {
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
-  //最终执行sql的地方
+  //最终执行sql的地方.委托给SqlSession.SqlSession调用Executor.
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
     switch (command.getType()) {

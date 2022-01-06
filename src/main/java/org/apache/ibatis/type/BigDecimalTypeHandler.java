@@ -35,6 +35,7 @@ public class BigDecimalTypeHandler extends BaseTypeHandler<BigDecimal> {
   @Override
   public BigDecimal getNullableResult(ResultSet rs, String columnName)
       throws SQLException {
+    //获取列名的数据类型.
     return rs.getBigDecimal(columnName);
   }
 
